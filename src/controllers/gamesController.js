@@ -28,12 +28,20 @@ export async function postGames(req, res) {
     try {
         const { name, image, stockTotal, categoryId, pricePerDay } = req.body;
 
-        const categoryExists = await connection.query('SELECT * FROM categories WHERE id=$1', [categoryId]);
+        const categoryExists = await connection.query(`
+            SELECT * 
+            FROM categories 
+            WHERE id=$1`
+            , [categoryId]);
         if (categoryExists.rowCount === 0) {
             return res.sendStatus(400);
         }
 
-        const gameExists = await connection.query('SELECT * FROM games WHERE name=$1', [name]);
+        const gameExists = await connection.query(`
+            SELECT * 
+            FROM games 
+            WHERE name=$1`
+            , [name]);
         if (gameExists.rowCount !== 0) {
             return res.sendStatus(409);
         }
@@ -41,7 +49,7 @@ export async function postGames(req, res) {
         await connection.query(`
             INSERT INTO
                 games(name, image, "stockTotal", "categoryId", "pricePerDay")
-                VALUES($1,$2,$3,$4,$5)`
+            VALUES($1,$2,$3,$4,$5)`
             , [name, image, parseInt(stockTotal), categoryId, parseInt(pricePerDay)]);
 
         res.sendStatus(201);
