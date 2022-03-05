@@ -15,7 +15,11 @@ export async function postCategories(req, res) {
     try {
         const { name } = req.body;
 
-        const alreadyTaken = await connection.query(`SELECT * FROM categories WHERE name=$1`, [name]);
+        const alreadyTaken = await connection.query(`
+            SELECT * FROM categories 
+                WHERE name=$1`
+            , [name]);
+
         if (alreadyTaken.rowCount !== 0) {
             return res.sendStatus(409);
         }

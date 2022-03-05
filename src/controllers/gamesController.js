@@ -4,21 +4,19 @@ export async function getGames(req, res) {
     try {
         const { name } = req.query;
 
-        let games;
-        if (name) {
-            games = await connection.query(`
-                SELECT games.*, categories.name AS "categoryName" FROM games
-                    JOIN categories
-                    ON games."categoryId"=categories.id
-                    WHERE LOWER(games.name) LIKE $1`
-                , [name + '%']);
-        } else {
-            games = await connection.query(`
-                SELECT games.*, categories.name AS "categoryName" FROM games
-                    JOIN categories
-                    ON games."categoryId"=categories.id
-                `);
+        let queryName = name;
+        if (!queryName) {
+            queryName = '';
         }
+
+        const games = await connection.query(`
+            SELECT 
+                games.*, 
+                categories.name AS "categoryName"
+            FROM games
+                JOIN categories ON games."categoryId"=categories.id
+            WHERE LOWER(games.name) LIKE $1`
+            , [queryName + '%']);
 
         res.status(200).send(games.rows);
     } catch (error) {
