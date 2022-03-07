@@ -4,6 +4,7 @@ export async function getCategories(req, res) {
     try {
         let offset = '';
         let limit = '';
+        let order = '';
 
         if (req.query.offset) {
             offset = `OFFSET ${req.query.offset}`;
@@ -13,11 +14,16 @@ export async function getCategories(req, res) {
             limit = `LIMIT ${req.query.limit}`;
         }
 
+        if (req.query.order) {
+            order = `ORDER BY "${req.query.order}"`;
+        }
+
         const categories = await connection.query(`
             SELECT * 
             FROM categories
             ${offset}
             ${limit}
+            ${order}
         `);
 
         res.send(categories.rows);

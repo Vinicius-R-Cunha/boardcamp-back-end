@@ -9,6 +9,7 @@ export async function getCustomers(req, res) {
 
         let offset = '';
         let limit = '';
+        let order = '';
 
         if (req.query.offset) {
             offset = `OFFSET ${req.query.offset}`;
@@ -18,12 +19,17 @@ export async function getCustomers(req, res) {
             limit = `LIMIT ${req.query.limit}`;
         }
 
+        if (req.query.order) {
+            order = `ORDER BY "${req.query.order}"`;
+        }
+
         const customers = await connection.query(`
                 SELECT * 
                 FROM customers
                 WHERE cpf LIKE $1
                 ${offset}
-                ${limit}`
+                ${limit}
+                ${order}`
             , [cpf + '%']);
 
         res.status(200).send(customers.rows);

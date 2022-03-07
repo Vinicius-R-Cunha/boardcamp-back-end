@@ -15,6 +15,7 @@ export async function getRentals(req, res) {
 
         let offset = '';
         let limit = '';
+        let order = '';
 
         if (req.query.offset) {
             offset = `OFFSET ${req.query.offset}`;
@@ -24,16 +25,20 @@ export async function getRentals(req, res) {
             limit = `LIMIT ${req.query.limit}`;
         }
 
+        if (req.query.order) {
+            order = `ORDER BY "${req.query.order}"`;
+        }
+
         const rentals = await connection.query({
             text: `
                 SELECT 
                     rentals.*, 
-                    customers.id,
-                    customers.name,
-                    games.id,
-                    games.name,
+                    customers.id AS "customersId",
+                    customers.name AS "customersName",
+                    games.id AS "gamesId",
+                    games.name AS "gamesName",
                     games."categoryId",
-                    categories.name
+                    categories.name AS "categoriesName"
                 FROM rentals
                     JOIN customers ON rentals."customerId"=customers.id
                     JOIN games ON rentals."gameId"=games.id
@@ -42,6 +47,7 @@ export async function getRentals(req, res) {
                 ${gameId}
                 ${offset}
                 ${limit}
+                ${order}
                 `,
             rowMode: 'array'
         })
