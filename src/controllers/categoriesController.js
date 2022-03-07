@@ -2,9 +2,22 @@ import connection from "../database.js";
 
 export async function getCategories(req, res) {
     try {
+        let offset = '';
+        let limit = '';
+
+        if (req.query.offset) {
+            offset = `OFFSET ${req.query.offset}`;
+        }
+
+        if (req.query.limit) {
+            limit = `LIMIT ${req.query.limit}`;
+        }
+
         const categories = await connection.query(`
             SELECT * 
             FROM categories
+            ${offset}
+            ${limit}
         `);
 
         res.send(categories.rows);

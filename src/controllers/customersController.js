@@ -2,19 +2,29 @@ import connection from "../database.js";
 
 export async function getCustomers(req, res) {
     try {
-        const { cpf } = req.query;
+        let cpf = req.query.cpf;
+        if (!cpf) {
+            cpf = '';
+        }
 
-        let customers;
-        if (cpf) {
-            customers = await connection.query(`
+        let offset = '';
+        let limit = '';
+
+        if (req.query.offset) {
+            offset = `OFFSET ${req.query.offset}`;
+        }
+
+        if (req.query.limit) {
+            limit = `LIMIT ${req.query.limit}`;
+        }
+
+        const customers = await connection.query(`
                 SELECT * 
                 FROM customers
-                WHERE cpf LIKE $1`
-                , [cpf + '%']);
-
-        } else {
-            customers = await connection.query('SELECT * FROM customers');
-        }
+                WHERE cpf LIKE $1
+                ${offset}
+                ${limit}`
+            , [cpf + '%']);
 
         res.status(200).send(customers.rows);
     } catch (error) {

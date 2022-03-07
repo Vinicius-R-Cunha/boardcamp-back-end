@@ -2,17 +2,26 @@ import connection from "../database.js";
 
 export async function getRentals(req, res) {
     try {
-        const { customerId, gameId } = req.query;
+        let customerId = '';
+        let gameId = '';
 
-        let queryCustomerId = '';
-        let queryGameId = '';
+        if (req.query.customerId && req.query.gameId) {
+            customerId = `WHERE "customerId"=${req.query.customerId} AND "gameId"=${req.query.gameId}`;
+        } else if (req.query.customerId) {
+            customerId = `WHERE "customerId"=${req.query.customerId}`;
+        } else if (req.query.gameId) {
+            gameId = `WHERE "gameId"=${req.query.gameId}`;
+        }
 
-        if (customerId && gameId) {
-            queryCustomerId = `WHERE "customerId"=${customerId} AND "gameId"=${gameId}`;
-        } else if (customerId) {
-            queryCustomerId = `WHERE "customerId"=${customerId}`;
-        } else if (gameId) {
-            queryGameId = `WHERE "gameId"=${gameId}`;
+        let offset = '';
+        let limit = '';
+
+        if (req.query.offset) {
+            offset = `OFFSET ${req.query.offset}`;
+        }
+
+        if (req.query.limit) {
+            limit = `LIMIT ${req.query.limit}`;
         }
 
         const rentals = await connection.query({
@@ -29,8 +38,10 @@ export async function getRentals(req, res) {
                     JOIN customers ON rentals."customerId"=customers.id
                     JOIN games ON rentals."gameId"=games.id
                     JOIN categories ON games."categoryId"=categories.id
-                ${queryCustomerId}
-                ${queryGameId}
+                ${customerId}
+                ${gameId}
+                ${offset}
+                ${limit}
                 `,
             rowMode: 'array'
         })
